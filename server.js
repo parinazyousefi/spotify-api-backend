@@ -5,14 +5,15 @@ const passport = require('passport');
 const SpotifyStrategy = require('passport-spotify').Strategy;
 const authRoutes = require('./routes/authRoutes');
 const playlistRoutes = require('./routes/playlistRoutes');
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
 
-console.log("SPOTIFY_CLIENT_ID:", process.env.SPOTIFY_CLIENT_ID);
-console.log("SPOTIFY_CLIENT_SECRET:", process.env.SPOTIFY_CLIENT_SECRET);
-console.log("SPOTIFY_CALLBACK_URL:", process.env.SPOTIFY_CALLBACK_URL);
-console.log("SESSION_SECRET:", process.env.SESSION_SECRET);
+app.use(cors({
+    origin: 'http://localhost:3000', // Allow requests from your frontend
+    credentials: true,
+  }));
 
 app.use(session({ 
   secret: process.env.SESSION_SECRET, 

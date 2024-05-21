@@ -1,15 +1,9 @@
-// routes/authRoutes.js
 const express = require('express');
+const authController = require('../controllers/authController');
 const router = express.Router();
-const {
-  spotifyAuth,
-  spotifyAuthCallback,
-  redirectToDashboard,
-  getDashboard
-} = require('../controllers/authController');
 
-router.get('/auth/spotify', spotifyAuth);
-router.get('/auth/spotify/callback', spotifyAuthCallback, redirectToDashboard);
-router.get('/dashboard', getDashboard);
+router.get('/auth/spotify', authController.spotifyAuth);
+router.get('/auth/spotify/callback', authController.spotifyCallback);
+router.get('/logout', authController.logout);
 
 module.exports = router;

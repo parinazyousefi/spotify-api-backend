@@ -1,26 +1,31 @@
-// controllers/authController.js
 const passport = require('passport');
 
-const spotifyAuth = passport.authenticate('spotify', {
-  scope: ['user-read-email', 'user-read-recently-played', 'playlist-modify-public', 'playlist-modify-private']
-});
+const authController = {
+  spotifyAuth: passport.authenticate('spotify', {
+    scope: ['user-read-email', 'user-read-recently-played', 'playlist-modify-public', 'user-read-recently-played',' user-top-read',' user-follow-read',' user-follow-modify',' playlist-read-private ','playlist-read-collaborative'],
+    showDialog: true,
+  }),
 
-const spotifyAuthCallback = passport.authenticate('spotify', { failureRedirect: '/' });
+  spotifyCallback: (req, res) => {
+    passport.authenticate('spotify', { failureRedirect: '/' }, (err, user) => {
+      if (err || !user) {
+        return res.redirect('/');
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          return res.redirect('/');
+        }
+        // Successful authentication, redirect to frontend dashboard
+        res.redirect('http://localhost:3000/dashboard');
+      });
+    })(req, res);
+  },
 
-const redirectToDashboard = (req, res) => {
-  res.redirect('/dashboard');
+  logout: (req, res) => {
+    req.logout(() => {
+      res.redirect('/');
+    });
+  },
 };
 
-const getDashboard = (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.redirect('/auth/spotify');
-  }
-  res.send(`Hello ${req.user.profile.displayName}`);
-};
-
-module.exports = {
-  spotifyAuth,
-  spotifyAuthCallback,
-  redirectToDashboard,
-  getDashboard
-};
+module.exports = authController;
