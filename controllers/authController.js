@@ -26,6 +26,7 @@ const authController = {
       res.redirect('/');
     });
   },
-};
+}
+
 
 module.exports = authController;

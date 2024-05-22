@@ -10,16 +10,14 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 
-app.use(cors({
-    origin: 'http://localhost:3000', // Allow requests from your frontend
-    credentials: true,
-  }));
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+
 
 app.use(session({ 
-  secret: process.env.SESSION_SECRET, 
-  resave: false, 
-  saveUninitialized: true 
-}));
+    secret: process.env.SESSION_SECRET, 
+    resave: false, 
+    saveUninitialized: true 
+  }));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -43,12 +41,10 @@ passport.deserializeUser((obj, done) => done(null, obj));
 app.use('/', authRoutes);
 app.use('/', playlistRoutes);
 
-// Home route
 app.get('/', (req, res) => {
   res.send('Welcome to Spotify Mood Playlist App!');
 });
 
-// Start the server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
