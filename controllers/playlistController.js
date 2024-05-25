@@ -141,7 +141,29 @@ const getTopArtists = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+const getTopSongs = async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.redirect("/auth/spotify");
+  }
+  try {
+    const { accessToken } = req.user;
+    const response = await axios.get(
+      "https://api.spotify.com/v1/me/top/tracks",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    const tracks = response.data.items;
+    res.json(tracks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 module.exports = {
   getRecentlyPlayed,
   getTopArtists,
+  getTopSongs
 };
