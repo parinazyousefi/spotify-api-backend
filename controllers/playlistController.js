@@ -1,5 +1,31 @@
-// controllers/playlistController.js
 const axios = require("axios");
+const SpotifyWebApi = require('spotify-web-api-node');
+
+const spotifyApi = new SpotifyWebApi({
+  clientId: process.env.SPOTIFY_CLIENT_ID,
+  clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+  redirectUri: process.env.SPOTIFY_REDIRECT_URI,
+});
+
+const getUser = async (req, res) => {
+  try {
+    if (!req.user || !req.user.accessToken) {
+      throw new Error('Access token is missing');
+    }
+
+    const accessToken = req.user.accessToken;
+    const response = await axios.get('https://api.spotify.com/v1/me', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching Spotify profile:', error.message);
+    res.status(500).send('Error fetching Spotify profile');
+  }
+};
 
 const getRecentlyPlayed = async (req, res) => {
   if (!req.isAuthenticated()) {
@@ -162,8 +188,67 @@ const getTopSongs = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+const getRecommendations = async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.redirect('/auth/spotify');
+  }
+  try {
+    const { accessToken } = req.user;
+    spotifyApi.setAccessToken(accessToken);
+
+    // Get recently played tracks
+    const recentlyPlayedResponse = await axios.get('https://api.spotify.com/v1/me/player/recently-played', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const recentlyPlayedTracks = recentlyPlayedResponse.data.items.map(item => item.track);
+
+    // Get audio features for recently played tracks
+    const trackIds = recentlyPlayedTracks.map(track => track.id);
+    const audioFeaturesResponse = await spotifyApi.getAudioFeaturesForTracks(trackIds);
+    const audioFeatures = audioFeaturesResponse.body.audio_features;
+
+    // Analyze the mood
+    const mood = analyzeMood(audioFeatures);
+
+    // Get recommendations based on the mood
+    const recommendationsResponse = await spotifyApi.getRecommendations({
+      seed_tracks: trackIds.slice(0, 5), // Use up to 5 seed tracks
+      target_danceability: mood.danceability,
+      target_energy: mood.energy,
+    });
+    const recommendedTracks = recommendationsResponse.body.tracks;
+
+    res.json(recommendedTracks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const analyzeMood = (audioFeatures) => {
+  let totalDanceability = 0;
+  let totalEnergy = 0;
+
+  audioFeatures.forEach(feature => {
+    totalDanceability += feature.danceability;
+    totalEnergy += feature.energy;
+  });
+
+  const avgDanceability = totalDanceability / audioFeatures.length;
+  const avgEnergy = totalEnergy / audioFeatures.length;
+
+  return {
+    danceability: avgDanceability,
+    energy: avgEnergy,
+  };
+};
+  
 module.exports = {
   getRecentlyPlayed,
   getTopArtists,
-  getTopSongs
+  getTopSongs,
+  getRecommendations,
+  getUser,
 };
