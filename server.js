@@ -11,10 +11,17 @@ const cookieParser = require('cookie-parser');
 const app = express();
 app.use(express.json());
 
-app.use(cors());
+const corsOptions = {
+  origin: 'https://mood-sync.netlify.app',
+  credentials: true,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+};
+
+app.use(cors(corsOptions));
 
 // Middleware to handle preflight requests
-app.options('*', cors());
+app.options('*', cors(corsOptions));
 // Cookie Parser Middleware
 app.use(cookieParser());
 
