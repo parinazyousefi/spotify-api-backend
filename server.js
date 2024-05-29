@@ -10,19 +10,23 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 
-app.use(cors({
-  origin: (origin, callback) => {
-    callback(null, true); // Allow all origins
-  },
-  credentials: true
-}));
+// CORS Configuration
+const corsOptions = {
+  origin: 'https://mood-sync.netlify.app', // Replace with your actual frontend URL
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
-
+// Session Configuration
 app.use(session({ 
-    secret: process.env.SESSION_SECRET, 
-    resave: false, 
-    saveUninitialized: true 
-  }));
+  secret: process.env.SESSION_SECRET, 
+  resave: false, 
+  saveUninitialized: true,
+  cookie: {
+    sameSite: 'None',
+    secure: true, // Ensure this is true if you're using HTTPS
+  }
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -32,7 +36,7 @@ passport.use(
     {
       clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: process.env.SPOTIFY_CALLBACK_URL
+      callbackURL: process.env.SPOTIFY_CALLBACK_URL,
     },
     function (accessToken, refreshToken, expires_in, profile, done) {
       return done(null, { profile, accessToken });
@@ -48,6 +52,12 @@ app.use('/', playlistRoutes);
 
 app.get('/', (req, res) => {
   res.send('Welcome to Spotify Mood Playlist App!');
+});
+
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
 const PORT = process.env.PORT || 8080;
