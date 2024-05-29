@@ -16,7 +16,7 @@ const authController = {
           return res.redirect('/');
         }
         // Successful authentication, redirect to frontend dashboard
-        res.redirect('http://localhost:3000/dashboard');
+        res.redirect('https://mood-sync.netlify.app/dashboard');
       });
     })(req, res);
   },
