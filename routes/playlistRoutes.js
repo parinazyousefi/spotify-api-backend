@@ -1,7 +1,7 @@
 // routes/playlistRoutes.js
 const express = require('express');
 const router = express.Router();
-const { getRecentlyPlayed, getTopArtists, getTopSongs, getRecommendations, getUser, createMoodPlaylist } = require('../controllers/playlistController');
+const { getRecentlyPlayed, getTopArtists, getTopSongs, getRecommendations, getUser} = require('../controllers/playlistController');
 
 router.get('/recently-played', getRecentlyPlayed);
 router.get('/top-artists',getTopArtists);

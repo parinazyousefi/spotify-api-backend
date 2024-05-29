@@ -11,11 +11,11 @@ const app = express();
 app.use(express.json());
 
 // CORS Configuration
-const corsOptions = {
-  origin: 'https://mood-sync.netlify.app', 
-  credentials: true,
-};
-app.use(cors(corsOptions));
+// const corsOptions = {
+//   origin: 'https://mood-sync.netlify.app', 
+//   credentials: true,
+// };
+app.use(cors());
 
 // Session Configuration
 app.use(session({ 
