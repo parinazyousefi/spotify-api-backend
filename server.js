@@ -13,11 +13,11 @@ const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(express.json());
-app.use(cookieParser());
 app.use(cors({
-  origin: process.env.FRONTEND_URI || 'http://localhost:3000',
+  origin: 'https://mood-sync.netlify.app',
   credentials: true,
 }));
+app.use(cookieParser());
 
 // Session Configuration
 app.use(session({
