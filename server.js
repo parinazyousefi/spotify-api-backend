@@ -10,11 +10,14 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 
-app.use(cors({
-  origin: 'https://mood-sync.netlify.app',
+// CORS Configuration
+const corsOptions = {
+  origin: 'https://mood-sync.netlify.app', 
   credentials: true,
-}));
+};
+app.use(cors(corsOptions));
 
+// Session Configuration
 app.use(session({ 
   secret: process.env.SESSION_SECRET, 
   resave: false, 
@@ -44,7 +47,7 @@ passport.use(
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
 
-app.use('/auth', authRoutes); // Use /auth for auth-related routes
+app.use('/', authRoutes);
 app.use('/', playlistRoutes);
 
 app.get('/', (req, res) => {
