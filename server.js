@@ -10,7 +10,12 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 
-app.use(cors({ origin: 'https://mood-sync.netlify.app', credentials: true }));
+app.use(cors({
+  origin: (origin, callback) => {
+    callback(null, true); // Allow all origins
+  },
+  credentials: true
+}));
 
 
 app.use(session({ 
