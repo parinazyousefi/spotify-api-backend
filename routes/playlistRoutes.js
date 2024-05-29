@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { getRecentlyPlayed, getTopArtists, getTopSongs, getRecommendations, getUser} = require('../controllers/playlistController');
 
-router.use(require('cors')());
+// router.use(require('cors')());
 
 router.get('/recently-played', getRecentlyPlayed);
 router.get('/top-artists',getTopArtists);
