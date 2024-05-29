@@ -9,58 +9,44 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const app = express();
+const PORT = process.env.PORT || 8080;
+
+// Middleware
 app.use(express.json());
-
-const corsOptions = {
-  origin: 'https://mood-sync.netlify.app',
-  credentials: true,
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-};
-
-app.use(cors(corsOptions));
-
-// Middleware to handle preflight requests
-app.options('*', cors(corsOptions));
-// Cookie Parser Middleware
 app.use(cookieParser());
-
-// Session Configuration
-app.use(session({ 
-  secret: process.env.SESSION_SECRET, 
-  resave: false, 
-  saveUninitialized: true,
-  cookie: {
-    sameSite: 'None',
-    secure: true 
-  }
+app.use(cors({
+  origin: process.env.FRONTEND_URI || 'http://localhost:3000',
+  credentials: true,
 }));
 
+// Session Configuration
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your_secret',
+  resave: false,
+  saveUninitialized: true,
+}));
+
+// Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use(
-  new SpotifyStrategy(
-    {
-      clientID: process.env.SPOTIFY_CLIENT_ID,
-      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: process.env.SPOTIFY_CALLBACK_URL,
-    },
-    function (accessToken, refreshToken, expires_in, profile, done) {
-      return done(null, { profile, accessToken });
-    }
-  )
-);
+// Passport Configuration
+passport.use(new SpotifyStrategy({
+  clientID: process.env.SPOTIFY_CLIENT_ID,
+  clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+  callbackURL: process.env.SPOTIFY_CALLBACK_URL,
+}, (accessToken, refreshToken, expires_in, profile, done) => {
+  // Save the user data
+  const user = { accessToken, profile };
+  done(null, user);
+}));
 
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
 
+// Routes
 app.use('/', authRoutes);
 app.use('/', playlistRoutes);
-
-app.get('/', (req, res) => {
-  res.send('Welcome to Spotify Mood Playlist App!');
-});
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
@@ -69,7 +55,7 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something broke!');
 });
 
-const PORT = process.env.PORT || 8080;
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
