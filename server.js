@@ -6,16 +6,19 @@ const SpotifyStrategy = require('passport-spotify').Strategy;
 const authRoutes = require('./routes/authRoutes');
 const playlistRoutes = require('./routes/playlistRoutes');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 app.use(express.json());
 
 // CORS Configuration
-// const corsOptions = {
-//   origin: 'https://mood-sync.netlify.app', 
-//   credentials: true,
-// };
-app.use(cors());
+app.use(cors({
+  origin: 'https://mood-sync.netlify.app', 
+  credentials: true,
+}));
+
+// Cookie Parser Middleware
+app.use(cookieParser());
 
 // Session Configuration
 app.use(session({ 
@@ -24,7 +27,7 @@ app.use(session({
   saveUninitialized: true,
   cookie: {
     sameSite: 'None',
-    secure: true, // Ensure this is true if you're using HTTPS
+    secure: process.env.NODE_ENV === 'production', // Ensure this is true if you're using HTTPS
   }
 }));
 
